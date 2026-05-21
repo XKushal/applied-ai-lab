@@ -1,0 +1,31 @@
+# env / secrets
+.env
+.env.*
+!.env.example
+
+# python
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+*.egg-info/
+dist/
+build/
+
+# node
+node_modules/
+.next/
+
+# vector stores / local data
+*.sqlite
+*.db
+data/chroma/
+data/qdrant/
+
+# editor / OS
+.DS_Store
+.idea/
+.vscode/
+*.swp
