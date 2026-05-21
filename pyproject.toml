@@ -1,0 +1,18 @@
+[project]
+name = "applied-ai-lab"
+version = "0.1.0"
+description = "Senior-engineer-meets-applied-AI: production-shaped patterns for LLM apps, RAG, MCP, and agentic systems."
+requires-python = ">=3.13"
+dependencies = [
+    "anthropic>=0.45.0",
+    "python-dotenv>=1.0.1",
+    # Phase 3.2+ will add: chromadb, voyageai, pypdf
+    # Phase 3.5 will add: mcp (the python SDK)
+    # Phase 4 will add: fastapi, uvicorn, opentelemetry-instrumentation-anthropic
+]
+
+[dependency-groups]
+dev = [
+    "pytest>=8.3.0",
+    "ruff>=0.7.0",
+]
