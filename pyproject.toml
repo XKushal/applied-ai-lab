@@ -6,7 +6,8 @@ requires-python = ">=3.13"
 dependencies = [
     "anthropic>=0.45.0",
     "python-dotenv>=1.0.1",
-    # Phase 3.2+ will add: chromadb, voyageai, pypdf
+    # Phase 3.2 — RAG
+    "chromadb>=0.5.0",          # vector DB w/ default embedding fn (ONNX, no torch)
     # Phase 3.5 will add: mcp (the python SDK)
     # Phase 4 will add: fastapi, uvicorn, opentelemetry-instrumentation-anthropic
 ]
