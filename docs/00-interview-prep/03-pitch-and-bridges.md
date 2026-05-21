@@ -10,7 +10,7 @@ Memorize the *shape*, not the words. Three beats, ~60 seconds spoken.
 >
 > The work I'm proudest of is the Data eXchange Platform — a Kafka-backed event-driven layer that decoupled 12+ services, cut their latency tails, and gave the team independent deploy velocity. Same DNA you'd see in any high-throughput IoT or telemetry pipeline.
 >
-> What's been pulling me lately is **applied AI** — I shipped a RAG + MCP integration in my StrengthLens project using the Anthropic API, and I've gotten interested in the hard parts: retrieval quality, agent reliability, hallucination mitigation, the production observability story for LLM apps. That's exactly the intersection your Enterprise AI team sits at — distributed systems experience meeting agentic AI — and it's why I'm in this conversation."
+> What's been pulling me lately is **applied AI** — I shipped an Anthropic-API-powered workout planner in my StrengthLens project (structured prompt engineering, versioned prompts, reliable JSON outputs), and I've gone deeper since in a personal lab — hand-rolling an MCP server and a RAG pipeline with eval to actually understand the primitives. The hard parts I've been learning to care about are retrieval quality, agent reliability, hallucination mitigation, and the production observability story for LLM apps. That's the intersection your Enterprise AI team sits at — distributed systems meeting applied AI — and it's why I'm in this conversation."
 
 ---
 
@@ -40,7 +40,7 @@ These are pre-written one-liners you can drop into any answer to make your healt
 | "At Kaiser we have 12 services on Kafka…" | *"…which is structurally the same as a building-sensor telemetry fan-out — one ingest topic, multiple independent consumers for alerting, analytics, AI inference."* |
 | "We tune p99 latency on healthcare APIs…" | *"…and the same SLO discipline applies to anything where the user is a human in the loop — a building operator needs the same response time guarantees a clinician does."* |
 | "We use Dynatrace + Splunk for observability…" | *"…and the LLM observability story is even harder — you also need to track which retrieval chunks were used, which tool calls fired, and whether the model's output was grounded. That's where OpenTelemetry semantic conventions for GenAI come in."* |
-| "I used RAG in StrengthLens grounded in user data…" | *"…the same pattern fits perfectly here — building manuals and SOPs become the RAG corpus, sensor queries become MCP tools, and the agent grounds its answer in both."* |
+| "I shipped structured prompt engineering in StrengthLens…" | *"…and the same discipline applies here at a bigger scope — versioned prompts, structured outputs, model-upgrade testing, plus RAG over building manuals and MCP for live tool calls as the next layer up."* |
 | "AKS production ops, Helm, KEDA…" | *"…that experience transfers cleanly to any Azure-native deployment; AKS is AKS whether it's serving health data or smart-building inference."* |
 
 ---

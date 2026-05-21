@@ -10,10 +10,10 @@ Every "what we look for" bullet from the JD → mapped to existing evidence on K
 | Python | StrengthLens AI work, listed in skills | **Adequate** | The hands-on phases of this repo will push this to **Strong** |
 | C++ | Not on resume | **Gap** | JCI lists this but rarely tests it for Enterprise AI roles. If asked: "It's the language I have least production time in; I've used it in coursework. I'd lean on team conventions to ramp." Don't oversell. |
 | Microsoft SQL | Delaget intern (stored procs, query plans) | **Adequate** | You've also done MySQL/PostgreSQL p99 tuning at Kaiser — pivot to that depth. Index strategy stories work across all RDBMS. |
-| Integrating AI models, APIs, and agentic frameworks | StrengthLens: RAG + MCP + Anthropic API | **Strong** | The repo's Phase 3 + capstone make this airtight |
+| Integrating AI models, APIs, and agentic frameworks | StrengthLens: Anthropic API + structured prompt engineering (NOT RAG/MCP — those live in this repo) | **Adequate, becoming Strong** | This repo's Phase 3 + capstone give you legitimate RAG + MCP experience to point at |
 | Containerization (Docker, Kubernetes) + microservices | Kaiser: AKS, Helm charts, KEDA autoscaling, 12+ microservices on Kafka | **Strong — possibly the strongest signal you have** | Lead with this in system-design rounds |
 | DevOps framework understanding | Kaiser: GitHub Actions + Jenkins CI/CD, SonarQube, Nexus IQ | **Strong** | Have a quality-gate story ready |
-| ML / Agentic AI / LLM understanding | StrengthLens RAG + MCP, lists LangChain basics | **Adequate** | Phase 2 + 3 of this repo turn this into **Strong** |
+| ML / Agentic AI / LLM understanding | StrengthLens prompt engineering, lists LangChain basics | **Adequate** | Phase 2 + 3 of this repo turn this into **Strong** |
 | Azure DevOps / Git / Visual Studio | Kaiser is on Azure (AKS); used GitHub Actions; Visual Studio at IMT/Delaget | **Strong** | Mention Azure casually — they're an Azure shop |
 | Proven dev experience | 6+ years senior | **Strong** | Lead with seniority confidently |
 | Client-facing + comms | Cross-team work at Kaiser (platform/security/product); ServiceNow incident triage | **Adequate** | Have one cross-functional collaboration story ready |
@@ -26,7 +26,7 @@ You **exceed the bar** on the technical core (distributed systems, microservices
 
 The interview risk is **not** "can you do the job" — it's:
 
-1. **AI depth probing.** "You used RAG — what chunk size? What embedding model? How did you evaluate retrieval? What about hallucination?" Answers need to be specific, not generic.
-2. **MCP depth probing.** Most interviewers don't know MCP themselves; the ones who do will probe hard. You should be able to whiteboard the message flow (JSON-RPC, tools/resources/prompts, stdio vs SSE transport).
-3. **Domain translation.** Healthcare ≠ smart buildings. You need bridge sentences (see [03-pitch-and-bridges.md](03-pitch-and-bridges.md)).
+1. **Resume-accuracy risk.** The resume currently lists "RAG" and "MCP" against StrengthLens, but the actual project was prompt engineering only. **Action:** rewrite those bullets before submitting / before the interview, and let RAG + MCP claims rest on the `applied-ai-lab` repo (where they're real). Never claim production RAG/MCP for StrengthLens — under probing you can't defend chunk size, embedding model, MCP message flow.
+2. **AI depth probing.** "Talk me through your RAG eval / your MCP transport / your agent retry logic." Phase 2 + 3 of this repo make these answers airtight.
+3. **Domain translation.** Healthcare ≠ smart buildings. Bridge sentences in [03-pitch-and-bridges.md](03-pitch-and-bridges.md).
 4. **Why JCI?** Senior interviewers always ask. Have a 2-sentence answer that's about *the work*, not the benefits. (Draft in pitch doc.)

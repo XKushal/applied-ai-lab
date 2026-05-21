@@ -32,16 +32,20 @@ Each story header lists the **question types it answers**, so you can deploy the
 
 ---
 
-## Story 3 — StrengthLens RAG + MCP
+## Story 3 — StrengthLens AI workout planner (prompt engineering with structured input)
 
-**Answers:** *"Tell me about an AI project you built." / "How have you used LLMs in production?" / "Walk me through an agentic system."*
+**Answers:** *"Tell me about an AI project you built." / "How have you used LLMs in production?" / "Tell me about a time you integrated a third-party AI API."*
 
-- **S** — Building a fitness app where users want personalized coaching. A generic LLM gives generic advice — useless. The value is grounding the model in *the user's own training history*.
-- **T** — Design an AI-first product experience that returns coaching responses grounded in each user's data, not in the model's training set.
-- **A** — Two-part architecture. First, **RAG**: I chunked the user's workout log into semantically meaningful units (per-session summaries, not raw rows), embedded them, stored vectors, and at query time retrieved the top-k relevant chunks before prompting Claude. Second, **MCP**: I exposed app tools (look up exercise metadata, query last 30 days of lifts, log a new session) through an MCP server so the LLM could *act*, not just *answer* — e.g., "log my session" became a tool call, not a parsed-text guess.
-- **R** — Responses became user-specific instead of generic. More importantly, I learned the failure modes — when retrieval misses, the model hallucinates confidently; when it hits, the answer is sharp. That's why retrieval evaluation matters as much as the model choice.
+> **Honest framing:** This was **prompt engineering with structured user input**, *not* RAG and *not* MCP. Don't claim either of those for this project — your real RAG/MCP experience lives in the `applied-ai-lab` repo (this one). Senior interviewers respect honest scoping far more than buzzword-stretching.
 
-**JCI bridge sentence:** *"That same pattern — RAG over domain documents, MCP tools for live data and actions — is exactly the shape of a building-ops copilot. Manuals and SOPs go into the RAG corpus; sensor queries and work-order creation become MCP tools."*
+- **S** — Building a cross-platform fitness app (React Native, Node/TS backend, Supabase) where the differentiator is a personalized workout plan generated for each user instead of a generic template.
+- **T** — Design the AI feature so the generated plan is actually personalized — reasoning over the user's goals, equipment, injury history, and schedule — and reliably structured enough to render in the app UI.
+- **A** — Built a structured **onboarding flow** that captures goals, available equipment, training experience, injuries, and weekly schedule. The backend assembles those answers into a templated prompt for the Anthropic API (Claude). I treated the prompt as code: versioned the prompt template, validated the model returns structured JSON matching a schema (workout name, sets/reps/rest, day-of-week assignment, progression notes), handled refusals and malformed outputs with retry/repair logic. Tested across model versions to catch output drift before users felt it.
+- **R** — Generated plans were specific to each user's inputs instead of generic templates. Hard lessons that translate to any LLM-in-production work: prompt versioning matters as much as code versioning, structured-output reliability is the difference between "demo" and "shippable", and model-version drift is real — a prompt that worked great on one Claude version can subtly regress on the next.
+
+**JCI bridge sentence:** *"That's the discipline that translates — treating prompts as versioned code, validating structured outputs, owning the model-version upgrade path. Same playbook applies whether the output is a workout plan or a building-ops recommendation."*
+
+**If they ask about RAG/MCP:** *"Not in StrengthLens — that was prompt engineering. I've been building the RAG + MCP pieces in a personal lab — `applied-ai-lab` on my GitHub — because I wanted to understand the primitives without leaning on a framework. Hand-rolled MCP server, RAG pipeline with eval. Happy to walk through it."*
 
 ---
 
