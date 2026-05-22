@@ -110,7 +110,7 @@ docker compose up --build
 - [x] **Phase 2** — 6 concept docs w/ Mermaid + interview-probe sections
 - [x] **Phase 3** — Hands-on builds (LLM → RAG w/ eval → tool-using agent → hand-rolled MCP)
 - [x] **Phase 4** — Capstone: Building Ops Assistant (3 sessions, fully dockerized)
-- [ ] **Phase 5** — Mock-interview drill + resume bullet rewrites
+- [x] **Phase 5** — Mock-interview drill + resume bullet rewrites
 
 ---
 
