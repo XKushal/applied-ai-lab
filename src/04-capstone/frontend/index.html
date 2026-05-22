@@ -1,0 +1,195 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Building Ops Assistant</title>
+  <style>
+    :root {
+      --bg: #0b1220; --panel: #131c2e; --text: #e8eefb; --muted: #8aa0c2;
+      --user: #1f6feb; --tool: #f59e0b; --tool-bg: #2a1f08;
+      --result: #16a34a; --result-bg: #0c2415;
+      --approval: #ef4444; --approval-bg: #2b1010;
+      --final: #e8eefb; --error: #ef4444;
+      --pill: #283450;
+    }
+    * { box-sizing: border-box; }
+    html, body { height: 100%; }
+    body {
+      margin: 0; background: var(--bg); color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+      display: flex; flex-direction: column;
+    }
+    header { padding: 14px 20px; border-bottom: 1px solid #1f2a44; background: var(--panel); }
+    header h1 { margin: 0; font-size: 16px; font-weight: 600; letter-spacing: 0.02em; }
+    header .sub { color: var(--muted); font-size: 12px; margin-top: 2px; }
+    main { flex: 1; overflow-y: auto; padding: 20px; }
+    .msg { max-width: 820px; margin: 0 auto 14px; padding: 12px 14px; border-radius: 10px; line-height: 1.45; }
+    .user { background: var(--user); color: white; }
+    .user .who { font-size: 11px; opacity: 0.8; margin-bottom: 4px; }
+    .tool-call { background: var(--tool-bg); border-left: 3px solid var(--tool); font-family: ui-monospace, monospace; font-size: 13px; }
+    .tool-call .name { color: var(--tool); font-weight: 600; }
+    .tool-result { background: var(--result-bg); border-left: 3px solid var(--result); font-family: ui-monospace, monospace; font-size: 12px; color: var(--muted); white-space: pre-wrap; }
+    .approval { background: var(--approval-bg); border-left: 3px solid var(--approval); padding: 14px; }
+    .approval h3 { margin: 0 0 8px; color: var(--approval); font-size: 14px; }
+    .approval pre { background: #0b1220; padding: 10px; border-radius: 6px; font-size: 12px; overflow-x: auto; margin: 6px 0 12px; }
+    .approval button { padding: 8px 14px; margin-right: 8px; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; }
+    .approval .approve { background: var(--result); color: white; }
+    .approval .deny { background: var(--approval); color: white; }
+    .approval.done { opacity: 0.7; }
+    .final { background: var(--panel); border-left: 3px solid var(--final); }
+    .error { background: var(--approval-bg); color: var(--error); border-left: 3px solid var(--error); }
+    .usage { max-width: 820px; margin: 0 auto 14px; color: var(--muted); font-size: 12px; text-align: center; }
+    .usage .pill { display: inline-block; background: var(--pill); padding: 3px 8px; border-radius: 12px; margin: 0 4px; }
+    footer { border-top: 1px solid #1f2a44; background: var(--panel); padding: 14px 20px; }
+    .input-row { max-width: 820px; margin: 0 auto; display: flex; gap: 8px; }
+    input[type=text] {
+      flex: 1; background: var(--bg); color: var(--text); border: 1px solid #2a3650;
+      border-radius: 8px; padding: 12px 14px; font-size: 14px; font-family: inherit;
+    }
+    input[type=text]:focus { outline: none; border-color: var(--user); }
+    button.send {
+      background: var(--user); color: white; border: none; border-radius: 8px;
+      padding: 0 22px; font-weight: 600; cursor: pointer;
+    }
+    button.send:disabled { opacity: 0.5; cursor: not-allowed; }
+    .examples { max-width: 820px; margin: 8px auto 0; font-size: 12px; color: var(--muted); }
+    .examples a { color: var(--muted); margin-right: 14px; cursor: pointer; text-decoration: underline dotted; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>🏢 Building Ops Assistant</h1>
+    <div class="sub">Phase 4b — RAG + MCP + agent loop + approval gate + cost cap. Trace at <code>localhost:16686</code>.</div>
+  </header>
+  <main id="log"></main>
+  <footer>
+    <div class="input-row">
+      <input id="q" type="text" placeholder="Ask about a sensor, a fault code, or propose a work order…" autofocus />
+      <button class="send" id="send">Send</button>
+    </div>
+    <div class="examples">
+      Try:
+      <a data-q="What does fault E12 mean?">fault E12</a>
+      <a data-q="Check sensor S-47 and tell me if I should worry">check S-47</a>
+      <a data-q="Sensor S-47 is in alarm — propose a P1 work order for the chiller">propose work order</a>
+    </div>
+  </footer>
+
+<script>
+const log = document.getElementById('log');
+const q = document.getElementById('q');
+const send = document.getElementById('send');
+
+document.querySelectorAll('.examples a').forEach(a => {
+  a.addEventListener('click', () => { q.value = a.dataset.q; q.focus(); });
+});
+
+function div(cls, html) {
+  const d = document.createElement('div');
+  d.className = 'msg ' + cls;
+  d.innerHTML = html;
+  log.appendChild(d);
+  log.scrollTop = log.scrollHeight;
+  return d;
+}
+
+function esc(s) {
+  return String(s).replace(/[&<>]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;'})[c]);
+}
+
+function renderEvent(evt) {
+  switch (evt.kind) {
+    case 'tool_call':
+      return div('tool-call',
+        `<span class="name">→ ${esc(evt.name)}</span>(${esc(JSON.stringify(evt.input))})`);
+    case 'tool_result':
+      return div('tool-result', `← ${esc(evt.preview)}`);
+    case 'approval_required':
+      const id = evt.proposed.approval_id;
+      const wo = JSON.stringify(evt.proposed.proposed_work_order, null, 2);
+      const node = div('approval',
+        `<h3>⚠ Approval required — ${esc(evt.name)}</h3>
+         <div>Approval ID: <code>${esc(id)}</code></div>
+         <pre>${esc(wo)}</pre>
+         <button class="approve" data-id="${esc(id)}">Approve</button>
+         <button class="deny" data-id="${esc(id)}">Deny</button>`);
+      node.querySelector('.approve').onclick = () => decide(id, true, node);
+      node.querySelector('.deny').onclick = () => decide(id, false, node);
+      return node;
+    case 'final':
+      return div('final', `<div>${esc(evt.text)}</div>`);
+    case 'usage':
+      const u = document.createElement('div');
+      u.className = 'usage';
+      u.innerHTML = `
+        <span class="pill">iters: ${evt.iterations}</span>
+        <span class="pill">in: ${evt.input_tokens}</span>
+        <span class="pill">out: ${evt.output_tokens}</span>
+        <span class="pill">cache write: ${evt.cache_write_tokens || 0}</span>
+        <span class="pill">cache read: ${evt.cache_read_tokens || 0}</span>
+        <span class="pill">cost: $${(evt.cost_usd ?? 0).toFixed(4)}</span>`;
+      log.appendChild(u);
+      log.scrollTop = log.scrollHeight;
+      return u;
+    case 'error':
+      return div('error', `Error: ${esc(evt.reason)} (cost $${evt.cost_usd} > cap $${evt.cap_usd})`);
+    default:
+      return div('tool-result', `(unknown event: ${esc(JSON.stringify(evt))})`);
+  }
+}
+
+async function decide(approval_id, approved, node) {
+  const resp = await fetch(`/approvals/${approval_id}`, {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({approved, note: approved ? 'user approved' : 'user denied'})
+  });
+  const j = await resp.json();
+  node.classList.add('done');
+  const result = document.createElement('div');
+  result.style.marginTop = '8px';
+  result.style.fontSize = '12px';
+  result.style.color = approved ? '#16a34a' : '#ef4444';
+  result.textContent = approved ? '✓ Approved (logged)' : '✗ Denied (logged)';
+  node.appendChild(result);
+}
+
+async function ask() {
+  const text = q.value.trim();
+  if (!text) return;
+  q.value = '';
+  send.disabled = true;
+  div('user', `<div class="who">you</div>${esc(text)}`);
+
+  const resp = await fetch('/chat', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({query: text})
+  });
+  const reader = resp.body.getReader();
+  const dec = new TextDecoder();
+  let buf = '';
+  while (true) {
+    const {value, done} = await reader.read();
+    if (done) break;
+    buf += dec.decode(value, {stream: true});
+    let nl;
+    while ((nl = buf.indexOf('\n\n')) >= 0) {
+      const chunk = buf.slice(0, nl); buf = buf.slice(nl + 2);
+      if (!chunk.startsWith('data: ')) continue;
+      const payload = chunk.slice(6);
+      if (payload === '[DONE]') continue;
+      try { renderEvent(JSON.parse(payload)); }
+      catch (e) { console.error('bad event', payload, e); }
+    }
+  }
+  send.disabled = false;
+  q.focus();
+}
+
+send.onclick = ask;
+q.addEventListener('keydown', e => { if (e.key === 'Enter') ask(); });
+</script>
+</body>
+</html>

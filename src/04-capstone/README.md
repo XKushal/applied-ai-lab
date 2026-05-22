@@ -2,11 +2,11 @@
 
 Production-shaped AI agent for HVAC/BMS operations. Same conceptual stack as everything else in this repo, but **wrapped in a FastAPI gateway, instrumented with OpenTelemetry, containerized, and viewable in Jaeger**.
 
-This folder is in active build — we're shipping in three sessions:
+Build progress:
 
-- **4a — done in this commit:** FastAPI + agent + MCP integration + OTel tracing + Docker
-- **4b — next:** HTML/JS chat UI, prompt caching, per-request cost cap, human-approval gate on a sensitive tool
-- **4c — last:** Kafka with synthetic sensor events + ingest worker writing telemetry
+- **4a — done:** FastAPI + agent + MCP integration + OTel tracing + Docker
+- **4b — done:** HTML/JS chat UI, prompt caching, per-request cost cap, `create_work_order` tool w/ approval gate
+- **4c — next:** Kafka with synthetic sensor events + ingest worker writing telemetry; polish top-level README w/ screenshots
 
 ## Architecture (session 4a)
 
@@ -41,15 +41,34 @@ flowchart LR
 src/04-capstone/
 ├── app/
 │   ├── __init__.py        ← makes app/ a Python package
-│   ├── main.py            ← FastAPI: /chat (SSE), /tools, /health
-│   ├── agent.py           ← agent loop w/ OTel GenAI semconv spans
+│   ├── main.py            ← FastAPI: /chat (SSE), /tools, /health, /approvals, / (UI)
+│   ├── agent.py           ← agent loop w/ OTel spans + prompt cache + cost cap
 │   ├── mcp_client.py      ← MCP client w/ per-call spans
+│   ├── pricing.py         ← per-token USD pricing table (single source of truth)
 │   └── telemetry.py       ← OTel setup; falls back to console exporter
+├── frontend/
+│   └── index.html         ← single-file chat UI w/ SSE + inline approval cards
 ├── docker/
 │   ├── Dockerfile         ← multi-stage, uv-based, pre-warms embedder + ingests corpus
 │   └── docker-compose.yml ← api + jaeger (all-in-one)
 └── README.md
 ```
+
+## Session 4b additions — what each one buys you
+
+### Prompt caching
+
+The system prompt and tool schemas are stable across all requests. We mark the last block of each with `cache_control: {type: "ephemeral"}`. After the first request, Anthropic returns those tokens as `cache_read_input_tokens` at ~10% of the fresh-input price. **Cache hit rate should be >70%** for any agent with a stable surface. In the UI's usage pill bar you'll see `cache read: N`, and the `gen_ai.usage.cache_read_input_tokens` span attribute lets you alert on regressions.
+
+### Per-request cost cap (`COST_CAP_USD`)
+
+Hard ceiling. Agent computes cumulative USD across iterations using `pricing.py`. If a single user request exceeds the cap, agent yields a structured `error` event and aborts cleanly — the UI shows it, no zombie loops, no surprise bills. Default `$0.50/request`; override in env.
+
+### `create_work_order` tool + approval gate
+
+A new MCP tool that is **deliberately side-effecting** — and so deliberately gated. The tool returns `{"status": "PENDING_APPROVAL", "approval_id": "...", "proposed_work_order": {...}}` instead of executing. The agent's system prompt teaches it to surface this to the user. The frontend renders an inline card with Approve/Deny buttons; clicking either POSTs to `/approvals/{approval_id}` which logs the decision.
+
+**Honest caveat (also in main.py):** A real prod approval gate uses session state — the server holds the half-finished agent loop, surfaces the proposed action, and resumes the loop on approve. We did the pedagogically equivalent stateless version so the architectural lesson lands without an async refactor. Mention this distinction in interviews; it shows you know what real prod looks like.
 
 ## Run it — two ways
 

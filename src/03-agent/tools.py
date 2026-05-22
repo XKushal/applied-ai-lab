@@ -91,6 +91,36 @@ def search_manual(query: str, top_k: int = 3) -> dict:
 
 
 # ---------------------------------------------------------------------------
+# Tool 3: create_work_order — SIDE-EFFECTING, gated by approval
+# ---------------------------------------------------------------------------
+# This tool deliberately DOES NOT execute the action. It returns a pending-
+# approval payload that the agent surfaces to the user, who decides via the
+# UI. The architectural point: any tool that mutates state (creates orders,
+# changes setpoints, sends alerts, calls people) requires human-in-the-loop.
+# In real production you'd hold the agent loop in a session and resume on
+# approval; we're keeping it stateless here for clarity.
+def create_work_order(
+    asset_id: str, summary: str, priority: str = "P3"
+) -> dict:
+    import uuid
+
+    return {
+        "status": "PENDING_APPROVAL",
+        "approval_id": f"wo-{uuid.uuid4().hex[:8]}",
+        "proposed_work_order": {
+            "asset_id": asset_id,
+            "summary": summary,
+            "priority": priority,
+        },
+        "instructions_for_agent": (
+            "This action is PENDING approval. Do not retry. "
+            "Report the proposed work order details to the user "
+            "and ask them to approve or deny it in the UI."
+        ),
+    }
+
+
+# ---------------------------------------------------------------------------
 # Schemas the LLM sees, + registry the agent runtime uses
 # ---------------------------------------------------------------------------
 
@@ -140,7 +170,40 @@ TOOL_SCHEMAS = [
     },
 ]
 
+TOOL_SCHEMAS.append(
+    {
+        "name": "create_work_order",
+        "description": (
+            "Propose a maintenance work order for an asset. This action is "
+            "SIDE-EFFECTING and requires human approval — the tool returns "
+            "a PENDING_APPROVAL response. After calling this, report the "
+            "proposed work order to the user and ask them to confirm in the UI."
+        ),
+        "input_schema": {
+            "type": "object",
+            "properties": {
+                "asset_id": {
+                    "type": "string",
+                    "description": "Asset/equipment identifier the work order is for.",
+                },
+                "summary": {
+                    "type": "string",
+                    "description": "Short description of what needs to be done.",
+                },
+                "priority": {
+                    "type": "string",
+                    "enum": ["P0", "P1", "P2", "P3"],
+                    "description": "Priority. P0=safety, P1=urgent, P2=this week, P3=routine.",
+                    "default": "P3",
+                },
+            },
+            "required": ["asset_id", "summary"],
+        },
+    }
+)
+
 TOOL_REGISTRY = {
     "query_telemetry": query_telemetry,
     "search_manual": search_manual,
+    "create_work_order": create_work_order,
 }
