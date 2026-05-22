@@ -1,0 +1,59 @@
+[
+  {
+    "id": "q01",
+    "question": "What does fault code E47 mean and what should I do about it?",
+    "gold_chunk_ids": [
+      "chiller-system-overview::Common alarms",
+      "fault-codes-reference::Chiller faults"
+    ],
+    "notes": "Two valid sources — count a hit if EITHER is retrieved."
+  },
+  {
+    "id": "q02",
+    "question": "What temperature should the chilled water supply be at?",
+    "gold_chunk_ids": ["chiller-system-overview::Normal operating parameters"]
+  },
+  {
+    "id": "q03",
+    "question": "When does the lag chiller start?",
+    "gold_chunk_ids": ["chiller-system-overview::Sequencing logic"]
+  },
+  {
+    "id": "q04",
+    "question": "How are BACnet device instance numbers formatted?",
+    "gold_chunk_ids": ["bms-network-architecture::Naming and addressing"]
+  },
+  {
+    "id": "q05",
+    "question": "How often are BMS device certificates rotated?",
+    "gold_chunk_ids": ["bms-network-architecture::Security posture"]
+  },
+  {
+    "id": "q06",
+    "question": "What happens to telemetry data if the MQTT broker is unreachable?",
+    "gold_chunk_ids": ["bms-network-architecture::Failure modes"]
+  },
+  {
+    "id": "q07",
+    "question": "What ID should an AI assistant use to refer to building devices?",
+    "gold_chunk_ids": ["bms-network-architecture::Why this matters for AI integrations"]
+  },
+  {
+    "id": "q08",
+    "question": "What is fault code E215 and what action does it require?",
+    "gold_chunk_ids": ["fault-codes-reference::Air-handling unit (AHU) faults"]
+  },
+  {
+    "id": "q09",
+    "question": "What is the difference between an E-code and a W-code?",
+    "gold_chunk_ids": ["fault-codes-reference::Format"]
+  },
+  {
+    "id": "q10",
+    "question": "What's the procedure when a smoke detector trips on an AHU?",
+    "gold_chunk_ids": [
+      "fault-codes-reference::Air-handling unit (AHU) faults",
+      "fault-codes-reference::When to escalate"
+    ]
+  }
+]

@@ -14,7 +14,10 @@ src/02-rag/
 │   └── bms-network-architecture.md
 ├── 01_ingest.py                  # load + chunk + embed + store
 ├── 02_retrieve.py                # retrieval ONLY (no LLM)
-└── 03_rag.py                     # full pipeline w/ grounded prompting + citations
+├── 03_rag.py                     # full pipeline w/ grounded prompting + citations
+└── eval/
+    ├── eval_set.json             # 10 labeled questions w/ gold chunk IDs
+    └── run_eval.py               # Recall@1, Recall@3, MRR — see Phase 3.3
 ```
 
 The Chroma DB persists under `data/chroma/` (gitignored).
