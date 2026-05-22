@@ -33,10 +33,60 @@ def _fake_temp_for(sensor_id: str, baseline: float = 70.0) -> float:
     return baseline + ((h % 41) - 15)
 
 
+# If the capstone telemetry pipeline (Phase 4c) is running, sensor readings
+# live in SQLite at $TELEMETRY_DB (default: data/telemetry.sqlite). We try
+# SQLite first; if it's empty/missing, we fall back to the hash-based mock
+# so the Phase 3 standalone agent still works without Kafka.
+import os
+import sqlite3
+from pathlib import Path
+
+_TELEMETRY_DB = Path(
+    os.environ.get(
+        "TELEMETRY_DB",
+        str(Path(__file__).parent.parent.parent / "data" / "telemetry.sqlite"),
+    )
+)
+
+
+def _latest_from_store(sensor_id: str) -> dict | None:
+    if not _TELEMETRY_DB.exists():
+        return None
+    try:
+        conn = sqlite3.connect(_TELEMETRY_DB, timeout=2.0)
+        row = conn.execute(
+            "SELECT ts, reading_f, baseline_f FROM readings "
+            "WHERE sensor_id = ? ORDER BY ts DESC LIMIT 1",
+            (sensor_id,),
+        ).fetchone()
+        conn.close()
+    except sqlite3.Error:
+        return None
+    if row is None:
+        return None
+    ts, reading_f, baseline_f = row
+    return {"ts": ts, "reading_f": reading_f, "baseline_f": baseline_f}
+
+
 def query_telemetry(sensor_id: str) -> dict:
-    """Look up the latest reading for a building sensor. Returns a dict."""
-    temp = _fake_temp_for(sensor_id)
+    """Look up the latest reading for a building sensor. Returns a dict.
+
+    Reads from the SQLite telemetry store (populated by the Kafka ingest
+    worker in Phase 4c) if it has data. Otherwise falls back to a
+    deterministic hash-based mock so the standalone agent still works.
+    """
     baseline = 70.0
+    row = _latest_from_store(sensor_id)
+    if row is not None:
+        temp = row["reading_f"]
+        baseline = row["baseline_f"]
+        ts = row["ts"]
+        source = "telemetry-store"
+    else:
+        temp = _fake_temp_for(sensor_id)
+        ts = "2026-05-22T14:03:11Z"
+        source = "mock"
+
     delta = temp - baseline
     return {
         "sensor_id": sensor_id,
@@ -44,7 +94,8 @@ def query_telemetry(sensor_id: str) -> dict:
         "baseline_f": baseline,
         "delta_f": round(delta, 1),
         "status": "alarm" if abs(delta) > 15 else "normal",
-        "timestamp": "2026-05-22T14:03:11Z",
+        "timestamp": ts,
+        "source": source,
     }
 
 
