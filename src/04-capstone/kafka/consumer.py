@@ -7,7 +7,7 @@ Run (standalone):
 
 Or in docker-compose as the `ingest` service.
 
-Production notes (the things you'd say in an interview):
+Production notes:
   • Auto-offset-reset = "earliest" so a fresh consumer reads the backlog.
     In real prod you'd use a consumer group + checkpointing.
   • One topic / one partition is fine for the demo. At scale you'd partition

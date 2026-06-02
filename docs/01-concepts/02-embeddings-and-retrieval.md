@@ -45,7 +45,7 @@ A vector DB stores embeddings + metadata and answers "give me the top-k vectors 
 | **Weaviate, Pinecone, Milvus** | Managed scale, $$$ |
 | **Elasticsearch / OpenSearch** | If you need vector + full-text in one box |
 
-For this lab we'll use **Chroma** in dev and discuss the pgvector pattern (which is what you'd reach for at JCI since they already run SQL).
+For this lab we'll use **Chroma** in dev and discuss the pgvector pattern (the natural choice for any shop that already runs Postgres/SQL).
 
 ---
 
@@ -108,7 +108,7 @@ You don't need all of these on day one. **Naïve top-k vector search** is a fine
 
 ---
 
-## What an interviewer will probe
+## Questions worth being able to answer
 
 - **"Why not just keyword search?"** → keyword search is fragile against synonyms, paraphrasing, and conceptual queries. Embeddings handle semantics. But you usually want **both** — that's hybrid retrieval.
 - **"Walk me through chunking."** → chunk size + overlap, structure-aware splitting, why fixed-character is bad, why you'd pick semantic chunking only when quality > build cost.

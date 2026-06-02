@@ -83,7 +83,7 @@ Hard ceiling. Agent computes cumulative USD across iterations using `pricing.py`
 
 A new MCP tool that is **deliberately side-effecting** — and so deliberately gated. The tool returns `{"status": "PENDING_APPROVAL", "approval_id": "...", "proposed_work_order": {...}}` instead of executing. The agent's system prompt teaches it to surface this to the user. The frontend renders an inline card with Approve/Deny buttons; clicking either POSTs to `/approvals/{approval_id}` which logs the decision.
 
-**Honest caveat (also in main.py):** A real prod approval gate uses session state — the server holds the half-finished agent loop, surfaces the proposed action, and resumes the loop on approve. We did the pedagogically equivalent stateless version so the architectural lesson lands without an async refactor. Mention this distinction in interviews; it shows you know what real prod looks like.
+**Honest caveat (also in main.py):** A real prod approval gate uses session state — the server holds the half-finished agent loop, surfaces the proposed action, and resumes the loop on approve. This is the pedagogically equivalent stateless version, so the architectural lesson lands without an async refactor. The distinction matters: real prod is the stateful pause/resume version.
 
 ## Session 4c additions — the event-driven half
 
@@ -108,7 +108,7 @@ Because **the same shape is the only sane way to build a real building-ops AI sy
 2. Topic → multiple independent consumers: a time-series store for queries, an alerting service, an AI inference service, an archive for compliance
 3. AI agent reads from the **derived store**, never directly from devices
 
-This is structurally the **same architecture** as Kushal's Kaiser DXP — Kafka decoupling 12+ services. Translating the story into JCI's domain: "I'd put HVAC sensor telemetry on Kafka, fan it out to a time-series tier the AI assistant queries, an alerting tier ops uses, and a compliance archive — same DNA as my Kaiser work, applied to building data." That's the interview bridge.
+This is structurally the **same architecture** as any large event-driven distributed system where Kafka decouples many services: HVAC sensor telemetry lands on Kafka, then fans out to a time-series tier the AI assistant queries, an alerting tier ops uses, and a compliance archive. The AI half is just one more consumer — the same DNA as classic distributed-systems design, applied to building data.
 
 ## Run the full stack
 
@@ -130,7 +130,7 @@ In the chat UI, try **"check sensor S-47"** — the response should show `source
 
 ## Closing notes
 
-All the architectural decisions you can defend in an interview:
+The architectural decisions and their trade-offs:
 
 1. **MCP server as subprocess** — simple for the demo. Prod = separate HTTP/SSE service per domain.
 2. **SQLite as telemetry store** — pattern is the point. Prod = Timescale / InfluxDB / cloud warehouse.
@@ -138,7 +138,7 @@ All the architectural decisions you can defend in an interview:
 4. **Pure-Python `kafka-python-ng`** — zero install friction. Prod throughput = `confluent-kafka` with librdkafka.
 5. **Single Kafka broker, KRaft mode** — demo-only. Prod = 3+ broker cluster with proper replication.
 
-Every one of these caveats is a senior signal when you bring them up unprompted.
+Each of these caveats is the kind of detail that separates a demo from a production design.
 
 ## Run it — two ways
 
@@ -186,7 +186,7 @@ agent.run                       (2.4s)
 │  └─ gen_ai.chat               (1.2s)
 ```
 
-**That trace is the artifact you put in the interview.** Screenshot it for the top-level README in session 4c.
+**That trace is the artifact worth showing.** It makes the whole agent trajectory legible in one view.
 
 ## OTel attribute conventions
 
@@ -208,8 +208,10 @@ Following the OTel [GenAI semantic conventions](https://opentelemetry.io/docs/sp
 | **SSE for `/chat`** | Lets the UI render tool-call progress as the agent runs | WebSocket if you need bidirectional later |
 | No auth | Lab scope | OIDC / bearer token, per-user rate limits, audit log per call |
 
-## What you can now legitimately claim
+## What this demonstrates
 
-> "I built a FastAPI agent gateway with an SSE-streaming `/chat` endpoint, instrumented with OpenTelemetry using the GenAI semantic conventions — every LLM call and every MCP tool call is a span, viewable in Jaeger. MCP server runs as a subprocess (would be a separate service in real prod). Whole thing is containerized and runs in docker-compose. Repo's public."
+Summed up:
 
-That sentence answers six interview questions at once — API design, agent loop, MCP integration, observability, deployment, and the candor of "what I'd do differently in real prod."
+> A FastAPI agent gateway with an SSE-streaming `/chat` endpoint, instrumented with OpenTelemetry using the GenAI semantic conventions — every LLM call and every MCP tool call is a span, viewable in Jaeger. The MCP server runs as a subprocess (would be a separate service in real prod). The whole thing is containerized and runs in docker-compose.
+
+That covers a lot of ground at once — API design, agent loop, MCP integration, observability, deployment, and an honest account of what would change in real prod.

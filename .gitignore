@@ -29,3 +29,7 @@ data/qdrant/
 .idea/
 .vscode/
 *.swp
+
+# private prep notes — kept local, not published
+docs/00-interview-prep/
+docs/99-mock-interview/

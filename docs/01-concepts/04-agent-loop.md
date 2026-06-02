@@ -2,7 +2,7 @@
 
 "Agent" is the most overloaded word in AI. Strip it down: an **agent** is an LLM running in a loop where, on each iteration, the model can either **respond** to the user or **call a tool** — and tool results get fed back into the next iteration. That's it. The loop is the agent.
 
-Everything else — planning, memory, multi-agent orchestration, ReAct, etc. — is a *pattern* layered on top of that loop. Knowing the bare mechanic puts you ahead of 80% of "I use LangChain" candidates.
+Everything else — planning, memory, multi-agent orchestration, ReAct, etc. — is a *pattern* layered on top of that loop. Knowing the bare mechanic matters far more than knowing which framework wraps it.
 
 ---
 
@@ -91,7 +91,7 @@ def run_agent(user_query, tools, max_iters=10):
 | **Streaming** | Stream both assistant text *and* tool-use events to the client so users see progress |
 | **Memory across turns** | Persist (or summarize) message history between user turns; this is the "memory" feature — it's storage + retrieval, not magic |
 
-Senior interviewers love when you bring up **approval gates** and **cost caps** unprompted. It signals you've actually thought about agents in production, not just demos.
+**Approval gates** and **cost caps** are the two additions that most clearly mark a production agent rather than a demo — they're what you reach for once you've run an agent against real side effects and a real bill.
 
 ---
 
@@ -121,7 +121,7 @@ Senior interviewers love when you bring up **approval gates** and **cost caps** 
 
 ---
 
-## What an interviewer will probe
+## Questions worth being able to answer
 
 - **"What is an agent?"** → an LLM in a loop that can call tools, where tool results feed back into the next iteration. The runtime executes the tools; the LLM only requests them.
 - **"How do you keep an agent from running forever?"** → `max_iters`, cost cap, latency timeout, detect repeated calls.

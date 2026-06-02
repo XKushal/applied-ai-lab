@@ -81,7 +81,7 @@ You don't need *all* of this on day one. You add components when **eval** tells 
 
 ## RAG evaluation — the discipline that separates senior from junior
 
-If you can't measure your RAG, you can't improve it. Most teams skip eval and ship vibes. Senior interviewers will ask about this specifically.
+If you can't measure your RAG, you can't improve it. Most teams skip eval and ship vibes. This is the part that most clearly separates a production system from a demo.
 
 ### Two evals, not one
 
@@ -100,7 +100,7 @@ If you can't measure your RAG, you can't improve it. Most teams skip eval and sh
 
 Get 30–100 real questions from real users (or simulate them with an LLM if you don't have users yet). For each, label which chunk(s) should be retrieved. **You only need to do this once per corpus**, and then every change you make has a number attached to "did this help or hurt?"
 
-> If a candidate tells you "I built a RAG system" but can't tell you their **Recall@5 number**, they don't have a production system, they have a demo.
+> If someone says "I built a RAG system" but can't quote a **Recall@5 number**, it's a demo, not a production system.
 
 ---
 
@@ -117,11 +117,11 @@ Get 30–100 real questions from real users (or simulate them with an LLM if you
 
 ---
 
-## What an interviewer will probe
+## Questions worth being able to answer
 
 - **"What does RAG stand for and when would you use it?"** → Retrieval-Augmented Generation. Use it when answers depend on data the model wasn't trained on (private docs, post-cutoff data, domain knowledge) AND the data is too large to fit in context every time.
 - **"Walk me through your RAG pipeline."** → use the production diagram above. Even if you only built the naïve version, *know what production adds and why.*
 - **"How do you evaluate retrieval quality?"** → labeled question set, Recall@k / MRR / nDCG. Mention LLM-as-judge for generation eval as a follow-up.
 - **"What's the difference between fine-tuning and RAG?"** → fine-tuning bakes new behavior/style into the weights (slow, expensive, hard to update); RAG injects facts at inference (fast, cheap, trivially updatable). They solve different problems. *Prefer RAG for facts, consider fine-tuning for style or format.*
 - **"How do you handle hallucinations?"** → grounding + citation requirement + output validation that cited chunks actually exist + refuse-when-unsupported prompt + post-hoc faithfulness checks.
-- **"How would you build this for JCI's building manuals?"** → ingestion job over PDF manuals (parsing, OCR for scans), structure-aware chunking on section headings, hybrid retrieval (BM25 catches model numbers and error codes — vector catches conceptual queries), MCP tool for live sensor data on top, citations back to the manual section so a technician can verify. **Eval set built from real technician questions.**
+- **"How would you build this for a corpus of building manuals?"** → ingestion job over PDF manuals (parsing, OCR for scans), structure-aware chunking on section headings, hybrid retrieval (BM25 catches model numbers and error codes — vector catches conceptual queries), MCP tool for live sensor data on top, citations back to the manual section so a technician can verify. **Eval set built from real technician questions.**

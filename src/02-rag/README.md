@@ -83,10 +83,10 @@ This is naïve RAG. It works for the demo. Things we have *not* done that the co
 | **Eval harness** | Always. Phase 3.3 (next) builds this. |
 | **Real-world embedding model** | Voyage-3 or text-embedding-3-large for English; domain-tuned for specialty corpora. MiniLM is fine for prototyping, weak for production. |
 
-## Tying this back to interviews
+## What this demonstrates
 
-You can now legitimately say:
+What this build covers, concretely:
 
-> "I built a RAG pipeline from scratch — structure-aware chunking on document hierarchy, persisted vector store in Chroma, grounded prompting with citation requirement, and runtime citation validation to catch hallucinated chunk IDs. Repo's public."
+> A RAG pipeline from scratch — structure-aware chunking on document hierarchy, a persisted vector store in Chroma, grounded prompting with a citation requirement, and runtime citation validation to catch hallucinated chunk IDs.
 
-That's a real answer, not a hand-wave. It maps directly to the production RAG diagram in [concepts doc 03](../../docs/01-concepts/03-rag-architecture.md), which means you can walk an interviewer up the maturity ladder from what you built → what production would add → why you'd add it.
+It maps directly to the production RAG diagram in [concepts doc 03](../../docs/01-concepts/03-rag-architecture.md), so the path from what's built here → what production would add → why you'd add it is explicit.
