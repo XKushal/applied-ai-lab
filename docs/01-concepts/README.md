@@ -1,6 +1,6 @@
-# Concepts — interview-defensible depth
+# Concepts — depth, not skim
 
-Six docs. Each is built to be re-read 3× before the interview, not skimmed once. Every doc ends with a **"What an interviewer will probe"** section — drill on those.
+Six docs. Each is built to be re-read, not skimmed once. Every doc ends with a **"Questions worth being able to answer"** section that turns the concept into the kind of probing you'd get in a design discussion.
 
 Reading order:
 
@@ -13,13 +13,13 @@ Reading order:
 
 Each doc has at least one Mermaid diagram (GitHub renders them natively — just open the file in the web UI).
 
-## Drill priority for a JCI interview
+## Where the payoff is highest
 
-Highest → lowest probability of coming up:
+Roughly highest → lowest in how often these come up for an applied-AI backend role:
 
-1. **RAG architecture + eval** — "walk me through your RAG pipeline" and "how do you measure retrieval quality" are *the* AI questions for this role
+1. **RAG architecture + eval** — "walk me through your RAG pipeline" and "how do you measure retrieval quality" are *the* core AI questions
 2. **Agent loop mechanics** — "what is an agent really doing?" — easy to flunk if you've only used a framework
-3. **MCP deep-dive** — fewer interviewers will probe this, but the ones who do go hard. High payoff if you know it cold.
+3. **MCP deep-dive** — fewer people probe this, but the ones who do go hard. High payoff for knowing it cold.
 4. **LLM mental model** — "when would you not use an LLM" is a senior-signal question
-5. **Observability** — your Kaiser experience already covers this; just need the AI-specific vocabulary
+5. **Observability** — distributed-systems experience already covers most of this; the AI-specific vocabulary is the gap to close
 6. **Embeddings + retrieval** — supports #1; standalone questions less common

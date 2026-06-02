@@ -1,6 +1,6 @@
 # MCP deep-dive — Model Context Protocol, the actual mechanics
 
-MCP is the part of the AI stack most candidates wave at without understanding. This is your unfair advantage: if you can whiteboard the **message lifecycle**, the **three primitives**, and **why MCP exists vs. just calling tools directly** — you'll sound like the rare engineer who's done the homework.
+MCP is the part of the AI stack most people wave at without understanding. The depth that pays off is being able to whiteboard the **message lifecycle**, the **three primitives**, and **why MCP exists vs. just calling tools directly** — the mechanics below cover exactly that.
 
 ---
 
@@ -47,7 +47,7 @@ flowchart LR
     end
 ```
 
-For JCI specifically: instead of every AI app at the company re-implementing "talk to the HVAC telemetry service", you'd build **one** "JCI telemetry MCP server" and any AI app could use it.
+Concretely: instead of every AI app in an organization re-implementing "talk to the HVAC telemetry service", you'd build **one** telemetry MCP server and any AI app could use it.
 
 ---
 
@@ -86,7 +86,7 @@ flowchart LR
 | **Resources** | Read-only data the host/user can attach to context. | Application-controlled (user picks) | `building-manual://section-4.3`, `db://customers/12345` |
 | **Prompts** | Pre-canned, parameterized prompts the user can invoke. | User-controlled (user picks from a menu) | `/summarize-incident incident_id=4837` |
 
-Most teams only ship **tools** and miss the resources/prompts story. Knowing the distinction is senior signal — when an interviewer asks "what are MCP's primitives", say all three and explain who controls each. Most candidates won't know there's a who-controls-what dimension.
+Most teams only ship **tools** and miss the resources/prompts story. The distinction worth holding onto is the who-controls-what dimension: name all three primitives *and* who drives each (model / app / user). That's the part most explanations skip.
 
 ---
 
@@ -140,7 +140,7 @@ The same JSON-RPC messages run over one of:
 | **stdio** | Local-only. Host spawns server as a subprocess; client writes JSON to server's stdin, reads JSON from stdout. Simplest. What Claude Desktop uses for most servers. |
 | **Streamable HTTP** (replaces older HTTP+SSE) | Remote servers. POST for requests, SSE for streaming responses. Used when the server runs on another host. |
 
-Senior follow-up question candidates miss: "Why stdio at all? Why not always HTTP?" — Because stdio servers can run as plain executables with no network exposure, OS-level permission inheritance, no auth surface area. Perfect for local-only tools (filesystem access, local-DB readers).
+The follow-up that often gets missed: "Why stdio at all? Why not always HTTP?" — Because stdio servers can run as plain executables with no network exposure, OS-level permission inheritance, no auth surface area. Perfect for local-only tools (filesystem access, local-DB readers).
 
 ---
 
@@ -168,19 +168,19 @@ The agent runtime **translates between the LLM's tool-use format and MCP's tools
 
 ---
 
-## Why this matters at JCI
+## Why this matters at enterprise scale
 
-JCI is a giant company with many internal systems (telemetry, work-order systems, building manuals, HR, security, ServiceNow, etc.). The right pattern isn't "build one agent that knows how to talk to all 50 systems." It's:
+A large enterprise has many internal systems (telemetry, work-order systems, building manuals, HR, security, ServiceNow, etc.). The right pattern isn't "build one agent that knows how to talk to all 50 systems." It's:
 
 1. Each system team builds an **MCP server** wrapping their domain (one server, one team's ownership).
-2. AI apps (whether built by Enterprise AI team or by product teams) consume those servers as needed.
+2. AI apps (whether built by a central AI team or by product teams) consume those servers as needed.
 3. Auth, observability, and rate-limiting live in the server — not duplicated in every consumer.
 
-That's a story you can tell in a system-design round and it makes you sound like you've already thought about how AI sits inside a big enterprise.
+That framing is exactly what a system-design round is looking for: how AI fits inside a large enterprise without every team reinventing the integration layer.
 
 ---
 
-## What an interviewer will probe
+## Questions worth being able to answer
 
 - **"What is MCP?"** → open standard for connecting AI apps to external tools/data via JSON-RPC over stdio or HTTP. Like LSP for AI.
 - **"What are the three primitives?"** → tools (model-controlled actions), resources (app-controlled data), prompts (user-controlled templates).
@@ -188,4 +188,4 @@ That's a story you can tell in a system-design round and it makes you sound like
 - **"Why use MCP instead of just calling APIs directly from the agent?"** → N+M vs N×M integrations, ownership boundary, reusability across AI apps, auth/observability centralization, language-agnostic servers, sandboxable processes.
 - **"stdio vs HTTP transport?"** → stdio = local, simple, OS-permission-scoped. HTTP = remote, needed when servers run separately or are shared across hosts.
 - **"What does the LLM actually see of MCP?"** → nothing directly. It sees a list of tools (name + description + JSON schema) and emits tool_use blocks. The host's MCP client is the bridge.
-- **"How would you architect MCP at JCI?"** → one server per domain (telemetry, work-orders, manuals, asset registry), owned by the team that owns the system. AI apps consume the servers. Auth and observability in the servers, not in every consumer.
+- **"How would you architect MCP at enterprise scale?"** → one server per domain (telemetry, work-orders, manuals, asset registry), owned by the team that owns the system. AI apps consume the servers. Auth and observability in the servers, not in every consumer.

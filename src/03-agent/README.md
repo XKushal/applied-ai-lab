@@ -9,7 +9,7 @@ The agent has access to:
 
 ## Why `search_manual` returns raw chunks (not generated answers)
 
-Design choice worth defending in an interview. By keeping retrieval pure and letting the *outer* agent LLM do the synthesis, we get:
+A design choice worth understanding. By keeping retrieval pure and letting the *outer* agent LLM do the synthesis, we get:
 
 - **Single source of reasoning.** No conflicting "this LLM said X, that LLM said Y" between tool and agent.
 - **Token efficiency.** One generation step per user turn, not one per retrieval.
@@ -64,7 +64,7 @@ Look at these four lines specifically — they're the difference between "demo" 
 | `temperature=0.1` | Drift between identical runs on factual queries. |
 | `if response.stop_reason == "end_turn": return ...` | Cleanly distinguish "model is done" from "model wants more tools". |
 
-These are the four production-shaping decisions an interviewer will want to hear about when they ask "how do you keep an agent stable in production?"
+These four lines are the core of the answer to "how do you keep an agent stable in production?"
 
 ## How this maps to the concepts doc
 
@@ -85,16 +85,16 @@ For the capstone (Phase 4), we'll add:
 - **Streaming** — stream both assistant text and tool-use events to the client so a UI shows progress.
 - **MCP transport** — Phase 3.5 takes these same tools and exposes them via an MCP server. Same logic, different transport.
 
-## Tying this back to interviews
+## What this demonstrates
 
-You now have, in code:
+In code, this build is:
 
 - A working tool-using agent loop, ~80 lines, with safety + observability hooks
-- An LLM that calls *your own RAG pipeline* as one of its tools — the production architecture from concepts doc 04
-- A printable trace of every iteration that you can screenshot for a portfolio readme
+- An LLM that calls the RAG pipeline from `src/02-rag/` as one of its tools — the production architecture from concepts doc 04
+- A printable trace of every iteration
 
-The interview answer:
+Summed up:
 
-> "I built an agent loop from scratch — bare Anthropic API, two tools (telemetry + RAG search), with iteration cap, tool-error-as-data, and per-run token tracking. The RAG retrieval from earlier is wired in as one of the tools, so the agent decides when to retrieve instead of always retrieving. Repo's public."
+> An agent loop from scratch — bare Anthropic API, two tools (telemetry + RAG search), with iteration cap, tool-error-as-data, and per-run token tracking. The RAG retrieval is wired in as one of the tools, so the agent decides when to retrieve instead of always retrieving.
 
-Three things to say next if probed: parallel tool use, why retrieval returns raw chunks (not generated answers), and what production additions live in the capstone.
+Three details worth calling out: parallel tool use, why retrieval returns raw chunks (not generated answers), and what production additions live in the capstone.

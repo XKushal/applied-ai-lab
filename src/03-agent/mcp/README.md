@@ -62,7 +62,7 @@ Structurally identical to `src/03-agent/agent.py` — same loop, same model, sam
 
 **This is the production architecture.** Every tool lives in a separate process (potentially a different team's repo, a different language, with its own auth) — and the agent just speaks MCP to all of them. Compare to `agent.py` where tools were imported as Python functions and ran in the same process.
 
-## The two spec gotchas you should mention unprompted in an interview
+## Two spec gotchas worth knowing
 
 ### 1. stdout is sacred
 
@@ -75,7 +75,7 @@ The server MUST NOT write anything to stdout that isn't a JSON-RPC message. A st
 | MCP `tools/list` response | `inputSchema` (camelCase) |
 | Anthropic Messages API `tools` param | `input_schema` (snake_case) |
 
-Same JSON Schema content, different field name. The agent runtime does the translation — see `mcp_to_anthropic()` in `agent_mcp.py`. This kind of impedance is the unsexy plumbing of integration that interviewers reward you for knowing about, because it means you've actually wired both ends.
+Same JSON Schema content, different field name. The agent runtime does the translation — see `mcp_to_anthropic()` in `agent_mcp.py`. This kind of impedance is the unglamorous plumbing of integration, and it only shows up once you've actually wired both ends.
 
 ## Architecture diagram of what you just built
 
@@ -104,14 +104,14 @@ flowchart LR
     class Chroma,Tools data
 ```
 
-## Tying this back to interviews
+## What this demonstrates
 
-You can now legitimately say:
+Summed up:
 
-> "I implemented an MCP server from raw JSON-RPC — handshake, tools/list, tools/call — and wired an agent client that translates between Anthropic's tool_use format and MCP's tools/call format. The agent doesn't import tools as Python functions; it talks to them via stdio JSON-RPC the same way it would talk to a Slack or DB MCP server. Repo's public."
+> An MCP server implemented from raw JSON-RPC — handshake, tools/list, tools/call — with an agent client that translates between Anthropic's tool_use format and MCP's tools/call format. The agent doesn't import tools as Python functions; it talks to them via stdio JSON-RPC the same way it would talk to a Slack or DB MCP server.
 
-Three follow-up things to volunteer if they keep probing:
+Three details worth knowing on top of that:
 
-1. **The three MCP primitives** (tools / resources / prompts) and who controls each (model / app / user). We only implemented tools because that's the agent-relevant primitive; resources and prompts are user-controlled and out of scope for this lab.
-2. **Stdio vs HTTP transport.** We used stdio because it's local-only, OS-permission-scoped, and zero auth surface area. Production multi-team MCP servers usually run as HTTP/SSE so multiple agents can connect.
-3. **The architectural payoff at JCI scale:** one MCP server per domain (telemetry, work orders, asset registry, building manuals), owned by the team that owns the system. AI apps consume the servers. Auth and observability live in the server, not duplicated in every consumer.
+1. **The three MCP primitives** (tools / resources / prompts) and who controls each (model / app / user). This build only implements tools because that's the agent-relevant primitive; resources and prompts are user-controlled and out of scope for the lab.
+2. **Stdio vs HTTP transport.** This uses stdio because it's local-only, OS-permission-scoped, and zero auth surface area. Production multi-team MCP servers usually run as HTTP/SSE so multiple agents can connect.
+3. **The architectural payoff at enterprise scale:** one MCP server per domain (telemetry, work orders, asset registry, building manuals), owned by the team that owns the system. AI apps consume the servers. Auth and observability live in the server, not duplicated in every consumer.

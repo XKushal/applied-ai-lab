@@ -75,7 +75,7 @@ The loop is the whole show. Streaming = exposing that loop to the client one tok
 
 ## When an LLM is the *wrong* tool
 
-Senior signal. Interviewers love this.
+A senior signal worth internalizing — knowing when *not* to reach for an LLM.
 
 | Problem | Better tool |
 |---|---|
@@ -88,10 +88,10 @@ Senior signal. Interviewers love this.
 
 ---
 
-## What an interviewer will probe
+## Questions worth being able to answer
 
 - **"Why is the answer different each time I ask the same question?"** → sampling + temperature.
 - **"How do you keep cost under control?"** → token accounting, prompt caching, smaller models for simple tasks, capping max_tokens, cache identical inputs.
-- **"How would you handle hallucinations in a JCI building-ops bot?"** → grounding via RAG or tool calls, refuse-when-unsure prompting, citation requirements, human-in-the-loop for actions, output validation against schemas.
-- **"When would you *not* use an LLM?"** → the table above. The candidate who can say "I'd use SQL here, not RAG" sounds 2x more senior than the one who reaches for an LLM every time.
+- **"How would you handle hallucinations in a building-ops bot?"** → grounding via RAG or tool calls, refuse-when-unsure prompting, citation requirements, human-in-the-loop for actions, output validation against schemas.
+- **"When would you *not* use an LLM?"** → the table above. Being able to say "I'd use SQL here, not RAG" reads as far more senior than reaching for an LLM every time.
 - **"What's a context window and why does it matter at scale?"** → token-limited memory, cost is linear in tokens, accuracy degrades past a length even when it fits.

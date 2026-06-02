@@ -12,7 +12,7 @@ cp .env.example .env
 # edit .env, paste your ANTHROPIC_API_KEY
 ```
 
-Then sync the venv (already done if you've been following along):
+Then sync the venv:
 
 ```bash
 uv sync
@@ -40,7 +40,7 @@ The whole "LLM API" is one HTTP POST. The SDK wraps it. The interesting part of 
   - `tool_use` — model wants to call a tool (see script 3)
   - `stop_sequence` — you specified a custom stop string and it appeared
 
-> **Interview probe defense:** if asked "what does an Anthropic API response look like?" you should be able to say "structured object with a list of typed content blocks, usage stats, stop reason." Most candidates say "a string." That's wrong.
+> **Worth knowing:** an Anthropic API response is a structured object — a list of typed content blocks, usage stats, and a stop reason. It is *not* just a string. Treating it as a string is the most common early mistake.
 
 ### `02_streaming.py` — TTFT vs. total time
 
@@ -48,7 +48,7 @@ Streaming doesn't make the model faster. It makes the **first chunk arrive soone
 
 Under the hood: Server-Sent Events (SSE). The SDK hides the transport but you can think of it as "HTTP response that flushes incrementally."
 
-> **Why this matters at JCI:** if you build a building-ops chatbot for a technician, that technician is standing in front of broken equipment. TTFT is UX.
+> **Why this matters:** in a building-ops chatbot, the technician is standing in front of broken equipment. TTFT is UX.
 
 ### `03_tool_use_preview.py` — what an agent's atom looks like
 
@@ -64,7 +64,7 @@ You'll see `stop_reason = "tool_use"` and a content block with `type=tool_use`. 
 
 Repeat until the model returns `stop_reason="end_turn"`. **That is the agent loop.** Everything beyond it — multi-agent, planners, ReAct prompting — is patterns on top of this two-step exchange.
 
-> **Interview probe defense:** if asked "what is an agent really?" — point at this script. An LLM that can emit tool_use, plus a runtime that honors those requests and loops. ~25 lines of Python (you'll write it in Phase 3.4).
+> **Worth knowing:** "what is an agent, really?" is answered by this script — an LLM that can emit tool_use, plus a runtime that honors those requests and loops. It's ~25 lines of Python, built out in `src/03-agent/`.
 
 ## Common gotchas
 

@@ -1,6 +1,6 @@
 # Observability for AI apps — the part that separates demos from production
 
-If your AI app doesn't have observability, you don't have a production system — you have a black box that occasionally gets a complaint. This is the doc where your Kaiser experience (Splunk + Dynatrace + SLOs) **directly translates** into AI-engineering depth.
+If your AI app doesn't have observability, you don't have a production system — you have a black box that occasionally gets a complaint. This is the doc where classic distributed-systems observability (Splunk + Dynatrace + SLOs) **directly translates** into AI-engineering depth.
 
 ---
 
@@ -30,7 +30,7 @@ So "200 OK + 800ms latency" tells you almost nothing about whether the system is
 
 ## OpenTelemetry semantic conventions for GenAI
 
-OTel (the open standard you've used at Kaiser via Dynatrace) has **GenAI semantic conventions** — a standard set of span attributes for AI workloads, so your traces are consistent across vendors. Examples of attributes:
+OTel (the same open standard behind backends like Dynatrace) has **GenAI semantic conventions** — a standard set of span attributes for AI workloads, so your traces are consistent across vendors. Examples of attributes:
 
 | Attribute | Example |
 |---|---|
@@ -41,7 +41,7 @@ OTel (the open standard you've used at Kaiser via Dynatrace) has **GenAI semanti
 | `gen_ai.usage.output_tokens` | `512` |
 | `gen_ai.operation.name` | `chat` / `tool_call` / `embedding` |
 
-Mention "OTel GenAI semconv" in an interview and the senior engineer across the table will recognize you've done the homework.
+Using "OTel GenAI semconv" correctly is a quick tell that someone has actually instrumented an AI system, not just read about it.
 
 ---
 
@@ -107,13 +107,13 @@ You should have **two layers of eval**:
 1. **Offline eval suite** — runs in CI on every prompt/model/RAG change. Labeled question set, Recall@k, LLM-as-judge faithfulness. No surprises in prod.
 2. **Online eval / monitoring** — sampling of prod traffic, run an LLM-as-judge faithfulness check, alert when the score drops below a threshold.
 
-The online eval is the AI equivalent of your Kaiser SLO story — you defined SLOs that mapped to user-visible behavior; for AI, the user-visible behavior is "the answer was grounded and helpful," and you measure it the same way.
+The online eval is the AI equivalent of a classic SLO practice — you define SLOs that map to user-visible behavior; for AI, the user-visible behavior is "the answer was grounded and helpful," and you measure it the same way.
 
 ---
 
 ## Safety + audit logging — the under-talked part
 
-For an enterprise like JCI, every LLM interaction probably needs to be **audit-logged** for compliance:
+For an enterprise, every LLM interaction probably needs to be **audit-logged** for compliance:
 
 - Full prompt + full response, retrievable by user ID + timestamp
 - Tool calls + their actual return values
@@ -129,19 +129,19 @@ This isn't optional in healthcare-adjacent or regulated industries. Smart-buildi
 | Layer | Tools |
 |---|---|
 | **OTel instrumentation** | `opentelemetry-instrumentation-anthropic`, `opentelemetry-instrumentation-openai` (auto-trace SDK calls) |
-| **Trace + metric backend** | Dynatrace (you know this), Datadog, Honeycomb, Grafana Tempo, Phoenix (open) |
+| **Trace + metric backend** | Dynatrace, Datadog, Honeycomb, Grafana Tempo, Phoenix (open) |
 | **LLM-specific observability** | Langfuse, Phoenix (Arize), Helicone, LangSmith — these add UI for prompt/trace inspection and eval |
 | **Eval frameworks** | Promptfoo, DeepEval, Inspect (UK AISI's), or hand-rolled w/ Pytest |
 
-For Phase 4 of this lab, we'll wire up **OpenTelemetry + Phoenix** locally — that gets you live trace visualization for the capstone agent, which you can screenshot and put in your README.
+For Phase 4 of this lab, we'll wire up **OpenTelemetry + Phoenix** locally — that gets you live trace visualization for the capstone agent.
 
 ---
 
-## What an interviewer will probe
+## Questions worth being able to answer
 
 - **"How would you monitor an LLM app in production?"** → the three pillars re-skinned for AI: structured logs of the trajectory, metrics on tokens/cost/quality/drift, OTel traces of the full request tree. Mention OTel GenAI semantic conventions.
 - **"How do you know your AI is still working?"** → offline eval in CI for changes + online sampling eval with LLM-as-judge + watching refusal/citation-validity drift.
 - **"What's prompt caching and why does it matter?"** → Anthropic and OpenAI both cache identical prompt prefixes; cache hits cost ~10% of fresh tokens. For agents with stable system prompts + tool schemas, cache hit rate should be >70% or you're burning money.
 - **"How do you audit an AI app?"** → full prompt+response logging keyed by user+timestamp+model version+prompt version, tool call ledger, redaction proof for PII.
 - **"Your AI app's quality dropped overnight — how do you debug?"** → check whether a model version changed, whether a prompt version changed, whether retrieval quality (Recall@k) dropped, whether refusal rate spiked, replay traces from before vs. after.
-- **"How does your Kaiser observability experience translate?"** → SLOs that map to user-visible behavior, distributed tracing across services, alert on regression *before* users feel it. Same playbook, AI-specific signals.
+- **"How does classic observability experience translate to AI?"** → SLOs that map to user-visible behavior, distributed tracing across services, alert on regression *before* users feel it. Same playbook, AI-specific signals.

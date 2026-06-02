@@ -64,8 +64,7 @@ def main() -> None:
         messages=[
             {
                 "role": "user",
-                "content": "What's the weather in Milwaukee right now? "
-                "(JCI's HQ is in Milwaukee, fun fact.)",
+                "content": "What's the weather in Milwaukee right now?",
             }
         ],
     )
